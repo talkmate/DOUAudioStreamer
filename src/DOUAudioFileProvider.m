@@ -285,7 +285,15 @@ static BOOL gLastProviderIsFinished = NO;
   _cachedURL = [NSURL fileURLWithPath:_cachedPath];
 
   [[NSFileManager defaultManager] createFileAtPath:_cachedPath contents:nil attributes:nil];
-  [[NSFileHandle fileHandleForWritingAtPath:_cachedPath] truncateFileAtOffset:_expectedLength];
+    
+    @try {
+        [[NSFileHandle fileHandleForWritingAtPath:_cachedPath] truncateFileAtOffset:_expectedLength];
+    } @catch (NSException *exception) {
+        _failed = YES;
+       NSLog(@"%@", exception.debugDescription);
+    } @finally {
+        
+    }
 
   _mimeType = [[_request responseHeaders] objectForKey:@"Content-Type"];
 
