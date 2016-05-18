@@ -84,6 +84,11 @@ NSString *const kDOUAudioStreamerErrorDomain = @"com.douban.audio-streamer.error
   return self;
 }
 
+- (void)dealloc{
+    
+    NSLog(@"♻️ Dealloc %@", NSStringFromClass([self class]));
+}
+
 + (double)volume
 {
   return [[DOUAudioEventLoop sharedEventLoop] volume];
