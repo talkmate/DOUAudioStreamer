@@ -61,7 +61,6 @@ static BOOL gLastProviderIsFinished = NO;
 @private
   DOUSimpleHTTPRequest *_request;
   NSURL *_audioFileURL;
-  NSString *_audioFileHost;
 
   CC_SHA256_CTX *_sha256Ctx;
 
@@ -177,9 +176,6 @@ static BOOL gLastProviderIsFinished = NO;
   self = [super _initWithAudioFile:audioFile];
   if (self) {
     _audioFileURL = [audioFile audioFileURL];
-    if ([audioFile respondsToSelector:@selector(audioFileHost)]) {
-      _audioFileHost = [audioFile audioFileHost];
-    }
 
     if ([DOUAudioStreamer options] & DOUAudioStreamerRequireSHA256) {
       _sha256Ctx = (CC_SHA256_CTX *)malloc(sizeof(CC_SHA256_CTX));
@@ -252,6 +248,7 @@ static BOOL gLastProviderIsFinished = NO;
   else {
     _requestCompleted = YES;
     [_mappedData dou_synchronizeMappedFile];
+    [[NSFileManager defaultManager] moveItemAtPath:self.cachedPath toPath:[self.cachedPath stringByDeletingPathExtension] error:nil];
   }
 
   if (!_failed &&
@@ -288,11 +285,6 @@ static BOOL gLastProviderIsFinished = NO;
   _cachedURL = [NSURL fileURLWithPath:_cachedPath];
 
   [[NSFileManager defaultManager] createFileAtPath:_cachedPath contents:nil attributes:nil];
-#if TARGET_OS_IPHONE
-  [[NSFileManager defaultManager] setAttributes:@{NSFileProtectionKey: NSFileProtectionNone}
-                                   ofItemAtPath:_cachedPath
-                                          error:NULL];
-#endif /* TARGET_OS_IPHONE */
   [[NSFileHandle fileHandleForWritingAtPath:_cachedPath] truncateFileAtOffset:_expectedLength];
 
   _mimeType = [[_request responseHeaders] objectForKey:@"Content-Type"];
@@ -360,9 +352,6 @@ static BOOL gLastProviderIsFinished = NO;
 - (void)_createRequest
 {
   _request = [DOUSimpleHTTPRequest requestWithURL:_audioFileURL];
-  if (_audioFileHost != nil) {
-    [_request setHost:_audioFileHost];
-  }
   __unsafe_unretained _DOUAudioRemoteFileProvider *_self = self;
 
   [_request setCompletedBlock:^{
@@ -659,6 +648,12 @@ static void audio_file_stream_packets_proc(void *inClientData,
   }
 
   NSURL *audioFileURL = [audioFile audioFileURL];
+  NSString *cacheFile = [[_DOUAudioRemoteFileProvider _cachedPathForAudioFileURL:audioFileURL] stringByDeletingPathExtension];
+  if ([[NSFileManager defaultManager] fileExistsAtPath:cacheFile isDirectory:NO]) {
+      
+      audioFileURL = [NSURL fileURLWithPath:cacheFile];
+      [audioFile setAudioFileURL:audioFileURL];
+  }
   if (audioFileURL == nil) {
     return nil;
   }
