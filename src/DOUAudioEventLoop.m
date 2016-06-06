@@ -493,6 +493,9 @@ static void audio_route_change_listener(void *inClientData,
   NSUInteger length = 0;
   [[[streamer decoder] lpcm] readBytes:&bytes length:&length];
   if (bytes != NULL) {
+      if (streamer.audioBuffer) {
+          streamer.audioBuffer(bytes,length);
+      }
     [_renderer renderBytes:bytes length:length];
     free(bytes);
   }

@@ -71,6 +71,8 @@ typedef NS_ENUM(NSInteger, DOUAudioStreamerErrorCode) {
 @property (nonatomic, readonly) NSUInteger downloadSpeed;
 @property (nonatomic, assign, readonly) double bufferingRatio;
 
+@property (copy, nonatomic) void(^audioBuffer) (void *bytes,NSUInteger length);
+
 - (void)play;
 - (void)pause;
 - (void)stop;
