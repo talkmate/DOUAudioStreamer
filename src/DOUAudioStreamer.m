@@ -207,10 +207,9 @@ NSString *const kDOUAudioStreamerErrorDomain = @"com.douban.audio-streamer.error
     }
 
     [[DOUAudioEventLoop sharedEventLoop] play];
-    //暂存 用作演示Buffer的输出
     self.audioBuffer = ^(void *bytes,NSUInteger length){
-          
-          NSLog(@"=========%lu",(unsigned long)length);
+          NSData *adata = [[NSData alloc] initWithBytes:bytes length:length];
+          NSLog(@"---------%@,=========%lu",adata,(unsigned long)length);
       };
   }
 }
