@@ -18,6 +18,7 @@
 #import "Track.h"
 #import "DOUAudioStreamer.h"
 #import "DOUAudioVisualizer.h"
+#import "RecordFile.h"
 
 static void *kStatusKVOKey = &kStatusKVOKey;
 static void *kDurationKVOKey = &kDurationKVOKey;
@@ -92,7 +93,7 @@ static void *kBufferingRatioKVOKey = &kBufferingRatioKVOKey;
   [_buttonStop addTarget:self action:@selector(_actionStop:) forControlEvents:UIControlEventTouchDown];
   [view addSubview:_buttonStop];
 
-  _progressSlider = [[UISlider alloc] initWithFrame:CGRectMake(20.0, CGRectGetMaxY([_buttonStop frame]) + 20.0, CGRectGetWidth([view bounds]) - 20.0 * 2.0, 40.0)];
+  _progressSlider = [[UISlider alloc] initWithFrame:CGRectMake(20.0, CGRectGetMaxY([_buttonStop frame]), CGRectGetWidth([view bounds]) - 20.0 * 2.0, 40.0)];
   [_progressSlider addTarget:self action:@selector(_actionSliderProgress:) forControlEvents:UIControlEventValueChanged];
   [view addSubview:_progressSlider];
 
@@ -106,7 +107,6 @@ static void *kBufferingRatioKVOKey = &kBufferingRatioKVOKey;
 
   _audioVisualizer = [[DOUAudioVisualizer alloc] initWithFrame:CGRectMake(0.0, CGRectGetMaxY([_volumeSlider frame]), CGRectGetWidth([view bounds]), CGRectGetHeight([view bounds]) - CGRectGetMaxY([_volumeSlider frame]))];
   [_audioVisualizer setBackgroundColor:[UIColor colorWithRed:239.0 / 255.0 green:244.0 / 255.0 blue:240.0 / 255.0 alpha:1.0]];
-  [view addSubview:_audioVisualizer];
 
   [self setView:view];
 }
@@ -145,6 +145,28 @@ static void *kBufferingRatioKVOKey = &kBufferingRatioKVOKey;
         
         [self _updateBufferingStatus];
         [self _setupHintForStreamer];
+        
+        RecordFile *file = [[RecordFile alloc]init];
+        [file setFrame:self.view.bounds];
+        [file addSubview:_audioVisualizer];
+        //    [file sendSubviewToBack:_audioVisualizer];
+        [self.view addSubview:file];
+        [self.view sendSubviewToBack:file];
+        __weak typeof (file) weakFile = file;
+        _streamer.audioBuffer = ^(void *bytes,NSUInteger length){
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //
+                // All the audio plot needs is the buffer data (float*) and the size.
+                // Internally the audio plot will handle all the drawing related code,
+                // history management, and freeing its own resources. Hence, one badass
+                // line of code gets you a pretty plot :)
+                //
+                
+                [weakFile.recordingAudioPlot updateBuffer:(float *)bytes
+                                           withBufferSize:(UInt32)length];
+            });
+        };
     }
 }
 

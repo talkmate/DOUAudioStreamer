@@ -130,7 +130,7 @@
   _coefficient = 0.0f;
   _step = 0;
   _stepCount = 6;
-  _interpolationType = DOUAudioVisualizerLinearInterpolation;
+  _interpolationType = DOUAudioVisualizerSmoothInterpolation;
 }
 
 - (id)initWithFrame:(CGRect)frame

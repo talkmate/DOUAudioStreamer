@@ -207,10 +207,10 @@ NSString *const kDOUAudioStreamerErrorDomain = @"com.douban.audio-streamer.error
     }
 
     [[DOUAudioEventLoop sharedEventLoop] play];
-    self.audioBuffer = ^(void *bytes,NSUInteger length){
-          NSData *adata = [[NSData alloc] initWithBytes:bytes length:length];
-          NSLog(@"---------%@,=========%lu",adata,(unsigned long)length);
-      };
+//    self.audioBuffer = ^(void *bytes,NSUInteger length){
+////          NSData *adata = [[NSData alloc] initWithBytes:bytes length:length];
+////          NSLog(@"---------%@,=========%lu",adata,(unsigned long)length);
+//      };
   }
 }
 

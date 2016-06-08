@@ -409,7 +409,7 @@ static OSStatus decoder_data_proc(AudioConverterRef inAudioConverter, UInt32 *io
   UInt32 inNumBytes = fillBufList.mBuffers[0].mDataByteSize;
   [_lpcm writeBytes:_decodingContext.outputBuffer length:inNumBytes];
   _decodingContext.outputPos += ioOutputDataPackets;
-
+    
   pthread_mutex_unlock(&_decodingContext.mutex);
   return DOUAudioDecoderSucceeded;
 }
